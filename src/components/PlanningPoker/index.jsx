@@ -16,8 +16,15 @@ import { UserList } from '../UserList';
 import * as styles from './planningpoker.module.css';
 
 // This is a special value that will trigger deleteing a score.
-const REMOVE_SCORE = "-";
-const POINTS = [REMOVE_SCORE, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+const REMOVE_SCORE = '-';
+const POINTS_INCREMENTAL = [REMOVE_SCORE, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+const POINTS_FIBONACCI = [REMOVE_SCORE, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89];
+const POINTS = {
+  incremental: POINTS_INCREMENTAL,
+  fibonacci: POINTS_FIBONACCI,
+};
+const POINT_OPTIONS = Object.keys(POINTS).sort();
+const POINT_OPTIONS_DEFAULT = 'incremental';
 
 function parseISOString(s) {
   var b = s.split(/\D+/);
@@ -30,9 +37,9 @@ const CopySession = session => {
   const copySessionId = React.useCallback(
     () =>
       copyToClipboard(
-        `${window.location.origin}${window.location.pathname}#${session.sessionId}`
+        `${window.location.origin}${window.location.pathname}#${session.sessionId}`,
       ),
-    [session]
+    [session],
   );
   React.useEffect(() => {
     state.value && toast.success(`Copied ${state.value}!`);
@@ -48,6 +55,7 @@ export const PlanningPoker = ({ session, user: localUser }) => {
   const [user, setUser] = React.useState();
   const [users, setUsers] = React.useState([]);
   const [scores, setScores] = React.useState([]);
+  const [pointOption, setPointOption] = React.useState(POINT_OPTIONS_DEFAULT);
 
   const showScores = scores.length && scores.every(score => score.revealed);
 
@@ -59,7 +67,7 @@ export const PlanningPoker = ({ session, user: localUser }) => {
     const activeUsers = users.filter(
       user =>
         parseISOString(user.last_presence) >
-        now.setSeconds(now.getSeconds() - afkSeconds)
+        now.setSeconds(now.getSeconds() - afkSeconds),
     );
     setUsers(activeUsers);
   };
@@ -149,8 +157,22 @@ export const PlanningPoker = ({ session, user: localUser }) => {
         updateAllScores(session, !showScores);
       }
     },
-    [session, showScores]
+    [session, showScores],
   );
+
+  const nextPointOption = (currentPointOption = POINT_OPTIONS_DEFAULT) => {
+    return POINT_OPTIONS[
+      (POINT_OPTIONS.indexOf(currentPointOption) + 1) % POINT_OPTIONS.length
+    ];
+  };
+
+  const updatePointOption = (cycleNextOption = true) => {
+    setPointOption(currentPointOption => {
+      return cycleNextOption
+        ? nextPointOption(currentPointOption)
+        : pointOption;
+    });
+  };
 
   return (
     <>
@@ -159,8 +181,17 @@ export const PlanningPoker = ({ session, user: localUser }) => {
       </Helmet>
       <CopySession sessionId={session} />
       <UserList me={user} users={users} scores={scores} />
-      <ScoreCards session={session} options={POINTS} />
-      <ModeratorControls {...{ session, showScores, toggleScores }} />
+      <ScoreCards session={session} options={POINTS[pointOption]} />
+      <ModeratorControls
+        {...{
+          session,
+          showScores,
+          toggleScores,
+          pointOption,
+          nextPointOption,
+          updatePointOption,
+        }}
+      />
     </>
   );
 };

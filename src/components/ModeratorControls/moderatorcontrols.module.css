@@ -22,12 +22,16 @@
       background-color: var(--bg-color-2);
     cursor: pointer;
   }
-  
+
   .reveal {
     border: 1px solid var(--color-discord-blue);
   }
-  
+
+  .points {
+    border: 1px solid var(--color-warning-yellow);
+    text-transform: capitalize;
+  }
+
   .reset {
     border: 1px solid var(--color-warning-red);
   }
-  

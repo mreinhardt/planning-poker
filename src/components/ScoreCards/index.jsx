@@ -1,5 +1,5 @@
 import React from 'react';
-import { resetScores, submitScore, deleteScore } from '../../api/scores';
+import { submitScore, deleteScore } from '../../api/scores';
 
 import * as styles from './scorecards.module.css';
 

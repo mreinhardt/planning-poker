@@ -3,7 +3,14 @@ import { toast } from 'react-toastify';
 import { resetScores } from '../../api/scores';
 import * as styles from './moderatorcontrols.module.css';
 
-export const ModeratorControls = ({ session, showScores, toggleScores }) => {
+export const ModeratorControls = ({
+  session,
+  showScores,
+  toggleScores,
+  pointOption,
+  nextPointOption,
+  updatePointOption,
+}) => {
   const [isModerator, setIsModerator] = React.useState(false);
 
   React.useEffect(() => {
@@ -13,6 +20,7 @@ export const ModeratorControls = ({ session, showScores, toggleScores }) => {
   }, [isModerator]);
 
   const reset = React.useCallback(() => {
+    updatePointOption(false);
     toggleScores(false); // Only change visuals
     resetScores(session);
   }, [session, toggleScores]);
@@ -30,20 +38,34 @@ export const ModeratorControls = ({ session, showScores, toggleScores }) => {
 
   return (
     <div className={styles.actions}>
-      <div
-        className={styles.reveal}
-        onClick={() =>
-          window.confirm(`${showScores ? 'Hide' : 'Reveal'} all cards?`) &&
-          toggleScores(true)
-        }
-      >
-        {showScores ? 'Hide' : 'Reveal'}
+      <div>
+        <div
+          classname={styles.reveal}
+          onclick={() =>
+            window.confirm(`${showScores ? 'Hide' : 'Reveal'} all cards?`) &&
+            toggleScores(true)
+          }
+        >
+          {showScores ? 'Hide' : 'Reveal'}
+        </div>
+        <div
+          classname={styles.reset}
+          onclick={() => window.confirm('Reset all cards?') && reset()}
+        >
+          Reset
+        </div>
       </div>
-      <div
-        className={styles.reset}
-        onClick={() => window.confirm('Reset all cards?') && reset()}
-      >
-        Reset
+      <div>
+        <div
+          classname={styles.points}
+          onclick={() =>
+            window.confirm(
+              `Change point options to ${nextPointOption(pointOption)}?`,
+            ) && updatePointOption(true)
+          }
+        >
+          {nextPointOption(pointOption)}
+        </div>
       </div>
     </div>
   );
